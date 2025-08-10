@@ -56,6 +56,7 @@
 
     <script>
         // Initialize the app
+        
         const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         let mealData = {};
         let groceryItems = [];
@@ -333,6 +334,23 @@
             if (savedPantryItems) pantryItems = JSON.parse(savedPantryItems);
         }
 
+        async function importJSON() {
+            const response = await fetch('./meals.json');
+            const localjson = await response.json();
+            const savedMealData = localjson.getItem('mealPlan');
+            const savedGroceryItems = localjson.getItem('groceryItems');
+            const savedPantryItems = localjson.getItem('pantryItems');
+            if (savedMealData) mealData = JSON.parse(savedMealData);
+            if (savedGroceryItems) groceryItems = JSON.parse(savedGroceryItems);
+            if (savedPantryItems) pantryItems = JSON.parse(savedPantryItems);
+        }
+
+        function exportJSON() {
+            localjson.setItem('mealPlan', JSON.stringify(mealData));
+            localjson.setItem('groceryItems', JSON.stringify(groceryItems));
+            localjson.setItem('pantryItems', JSON.stringify(pantryItems));
+        }
+
         // Save meal plan (export as JSON)
         function saveMealPlan() {
             const data = {
@@ -435,6 +453,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeMealPlan();
             loadFromLocalStorage();
+            importJSON();
             updateMealPlanInputs();
             renderGroceryList();
             renderPantryList();

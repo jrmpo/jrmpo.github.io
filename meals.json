@@ -1,0 +1,122 @@
+{
+  "mealPlan": {
+    "Monday": {
+      "dinner": "Grilled Chicken, Rice Bowls",
+      "ingredients": "Chicken Breast, Broccoli, Tomato, Lettuce, cucumber"
+    },
+    "Tuesday": {
+      "dinner": "Steak, Boursin Potatoes, Mushrooms, caesar",
+      "ingredients": "Steak, Mushrooms, Potatoes"
+    },
+    "Wednesday": {
+      "dinner": "Crispy Rice, Salmon, Veg",
+      "ingredients": "Salmon"
+    },
+    "Thursday": {
+      "dinner": "Quinoa Dill Bean Salad, Chicken Cutlet",
+      "ingredients": "Dill, White Beans, Quinoa"
+    },
+    "Friday": {
+      "dinner": "Picnic, Leftover Chicken Sandwich",
+      "ingredients": ""
+    },
+    "Saturday": {
+      "dinner": "Small greens",
+      "ingredients": "Goof"
+    },
+    "Sunday": {
+      "dinner": "Spinach Basil Pesto w/ Sun Dried Tomatoes",
+      "ingredients": "Basil, Lemon, Spinach, Sundried tomato, Pasta"
+    }
+  },
+  "groceryList": [
+    {
+      "text": "basil",
+      "completed": false,
+      "id": 1754844984638.6375
+    },
+    {
+      "text": "lemon",
+      "completed": false,
+      "id": 1754844984638.6826
+    },
+    {
+      "text": "chicken breast",
+      "completed": false,
+      "id": 1754844988493.986
+    },
+    {
+      "text": "broccoli",
+      "completed": false,
+      "id": 1754844988493.2068
+    },
+    {
+      "text": "tomato",
+      "completed": false,
+      "id": 1754844988493.4133
+    },
+    {
+      "text": "lettuce",
+      "completed": false,
+      "id": 1754844988493.7146
+    },
+    {
+      "text": "steak",
+      "completed": false,
+      "id": 1754845119947.9128
+    },
+    {
+      "text": "mushrooms",
+      "completed": false,
+      "id": 1754845119947.052
+    },
+    {
+      "text": "potatoes",
+      "completed": false,
+      "id": 1754845119947.105
+    },
+    {
+      "text": "salmon",
+      "completed": false,
+      "id": 1754845580683.6697
+    },
+    {
+      "text": "dill",
+      "completed": false,
+      "id": 1754846072152.4412
+    },
+    {
+      "text": "white beans",
+      "completed": false,
+      "id": 1754846072152.2537
+    }
+  ],
+  "pantryItems": [
+    {
+      "text": "spinach",
+      "completed": false,
+      "id": 1754846188931.4817
+    },
+    {
+      "text": "quinoa",
+      "completed": false,
+      "id": 1754846188931.8213
+    },
+    {
+      "text": "sun-dried tomato",
+      "completed": false,
+      "id": 1754846271583
+    },
+    {
+      "text": "cucumber",
+      "completed": false,
+      "id": 1754846281610
+    },
+    {
+      "text": "pasta",
+      "completed": false,
+      "id": 1754846299728.5923
+    }
+  ],
+  "savedDate": "2025-08-10T17:18:46.793Z"
+}
