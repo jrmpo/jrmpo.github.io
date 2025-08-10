@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Meal Planner</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>🍽️ Weekly Meal Planner</h1>
+        
+        <div class="main-content">
+            <div class="meal-plan">
+                <h2>📅 Weekly Meal Plan</h2>
+                <div id="mealPlan">
+                    <!-- Meal plan days will be generated here -->
+                </div>
+            </div>
+            
+            <div class="grocery-section">
+                <h2>🛒 Grocery List</h2>
+                <div class="add-item-container">
+                    <input type="text" id="groceryInput" class="add-item-input" placeholder="Add grocery item..." />
+                    <button onclick="addGroceryItem()" class="add-btn">Add</button>
+                </div>
+                <div id="groceryList" class="grocery-list">
+                    <!-- Grocery items will be added here -->
+                </div>
+                <div id="buttonContainer" class="button-contatiner">
+                    <button onclick="clearCompleted()" class="clear-completed-btn">Clear Completed</button>
+                    <button onclick="moveGrocerytoPantry()" class="clear-completed-btn">Move Completed to Pantry</button>
+                </div>
+                
+                <h2 style="margin-top: 30px;">🏠 Pantry Items</h2>
+                <div class="add-item-container">
+                    <input type="text" id="pantryInput" class="add-item-input" placeholder="Add pantry item..." />
+                    <button onclick="addPantryItem()" class="add-btn">Add</button>
+                </div>
+                <div id="pantryList" class="grocery-list">
+                    <!-- Pantry items will be added here -->
+                </div>
+                <div id="buttonContainer" class="button-contatiner">
+                    <button onclick="clearPantryCompleted()" class="clear-completed-btn">Clear Used Items</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions-container">
+            <button onclick="saveMealPlan()" class="action-btn">💾 Save Plan</button>
+            <button onclick="loadMealPlan()" class="action-btn">📂 Load Plan</button>
+            <button onclick="clearAll()" class="action-btn">🗑️ Clear All</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the app
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let mealData = {};
+        let groceryItems = [];
+        let pantryItems = [];
+
+        // Initialize meal plan
+        function initializeMealPlan() {
+            const mealPlanContainer = document.getElementById('mealPlan');
+            
+            days.forEach(day => {
+                mealData[day] = { dinner: '', ingredients: '' };
+                
+                const dayContainer = document.createElement('div');
+                dayContainer.className = 'day-container';
+                
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'day-label';
+                dayLabel.textContent = day;
+                
+                const mealInputs = document.createElement('div');
+                mealInputs.className = 'meal-inputs';
+                
+                // Dinner input
+                const dinnerInput = document.createElement('input');
+                dinnerInput.type = 'text';
+                dinnerInput.className = 'meal-input';
+                dinnerInput.placeholder = 'Dinner';
+                dinnerInput.id = `${day}-dinner`;
+                dinnerInput.addEventListener('input', (e) => {
+                    mealData[day].dinner = e.target.value;
+                    saveToLocalStorage();
+                });
+                
+                // Ingredients input
+                const ingredientsInput = document.createElement('input');
+                ingredientsInput.type = 'text';
+                ingredientsInput.className = 'meal-input';
+                ingredientsInput.placeholder = 'Ingredients (comma separated)';
+                ingredientsInput.id = `${day}-ingredients`;
+                ingredientsInput.addEventListener('input', (e) => {
+                    mealData[day].ingredients = e.target.value;
+                    saveToLocalStorage();
+                });
+                
+                // Add to grocery list button
+                const addButton = document.createElement('button');
+                addButton.className = 'add-ingredients-btn';
+                addButton.textContent = '+ Add to Grocery List';
+                addButton.onclick = () => addIngredientsToGroceryList(day);
+                
+                mealInputs.appendChild(dinnerInput);
+                mealInputs.appendChild(ingredientsInput);
+                mealInputs.appendChild(addButton);
+                
+                dayContainer.appendChild(dayLabel);
+                dayContainer.appendChild(mealInputs);
+                mealPlanContainer.appendChild(dayContainer);
+            });
+        }
+
+        // Add grocery item
+        function addGroceryItem() {
+            const input = document.getElementById('groceryInput');
+            const item = input.value.trim();
+            
+            if (item) {
+                groceryItems.push({ text: item, completed: false, id: Date.now() });
+                input.value = '';
+                renderGroceryList();
+                saveToLocalStorage();
+            }
+        }
+
+        // Render grocery list
+        function renderGroceryList() {
+            const container = document.getElementById('groceryList');
+            container.innerHTML = '';
+            
+            groceryItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `grocery-item ${item.completed ? 'completed' : ''}`;
+                
+                itemDiv.innerHTML = `
+                    <input type="checkbox" class="grocery-checkbox" ${item.completed ? 'checked' : ''} 
+                           onchange="toggleGroceryItem(${item.id})">
+                    <span class="grocery-text">${item.text}</span>
+                    <button class="delete-btn" onclick="deleteGroceryItem(${item.id})">✕</button>
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // Add pantry item
+        function addPantryItem() {
+            const input = document.getElementById('pantryInput');
+            const item = input.value.trim();
+            
+            if (item) {
+                pantryItems.push({ text: item, completed: false, id: Date.now() });
+                input.value = '';
+                renderPantryList();
+                saveToLocalStorage();
+            }
+        }
+
+        // Render pantry list
+        function renderPantryList() {
+            const container = document.getElementById('pantryList');
+            container.innerHTML = '';
+            
+            pantryItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `grocery-item ${item.completed ? 'completed' : ''}`;
+                
+                itemDiv.innerHTML = `
+                    <input type="checkbox" class="grocery-checkbox" ${item.completed ? 'checked' : ''} 
+                           onchange="togglePantryItem(${item.id})">
+                    <span class="grocery-text">${item.text}</span>
+                    <div class="item-buttons">
+                        <button class="move-btn" onclick="movePantryToGrocery(${item.id})" title="Move to Grocery List">🛒</button>
+                        <button class="delete-btn" onclick="deletePantryItem(${item.id})">✕</button>
+                    </div>
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // Toggle pantry item completion
+        function togglePantryItem(id) {
+            const item = pantryItems.find(item => item.id === id);
+            if (item) {
+                item.completed = !item.completed;
+                renderPantryList();
+                saveToLocalStorage();
+            }
+        }
+
+        // Delete pantry item
+        function deletePantryItem(id) {
+            pantryItems = pantryItems.filter(item => item.id !== id);
+            renderPantryList();
+            saveToLocalStorage();
+        }
+
+        function movePantryToGrocery(id){
+            const item = pantryItems.find(item => item.id === id);
+            const existingGroceryItems = groceryItems.map(item => item.text.toLowerCase());
+            if (existingGroceryItems.includes(item.text)) {
+                alert('Item already in Grocery List');
+            } else {
+                groceryItems.push({ text: item.text, completed: false, id: Date.now() });
+                deletePantryItem(id);
+                renderPantryList();
+                renderGroceryList();
+                saveToLocalStorage();
+            }
+        }
+
+        function moveGrocerytoPantry(){
+            boughtItems = groceryItems.filter(item => item.completed);
+            const pantryItemsText = pantryItems.map(item => item.text.toLowerCase());
+            boughtItems.forEach(ingredient => {
+                const inPantry = pantryItemsText.some(pantryItem => 
+                    pantryItem.includes(ingredient.text)
+                );
+
+                if (!inPantry) {
+                    pantryItems.push({ text: ingredient.text, completed: false, id: Date.now() + Math.random() });
+                    deleteGroceryItem(ingredient.id);
+                }
+            })
+
+            groceryItems = groceryItems.filter(item => !item.completed);
+            renderPantryList();
+            renderGroceryList();
+            saveToLocalStorage();
+        }
+
+        // Add ingredients from a day to grocery list (only if not in pantry)
+        function addIngredientsToGroceryList(day) {
+            const ingredientsText = mealData[day]?.ingredients || '';
+            if (!ingredientsText.trim()) {
+                alert('No ingredients listed for this day!');
+                return;
+            }
+
+            const ingredients = ingredientsText.split(',').map(item => item.trim()).filter(item => item);
+            const pantryItemsText = pantryItems.map(item => item.text.toLowerCase());
+            const existingGroceryItems = groceryItems.map(item => item.text.toLowerCase());
+            
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            ingredients.forEach(ingredient => {
+                const ingredientLower = ingredient.toLowerCase();
+                
+                // Check if ingredient is already in pantry or grocery list
+                const inPantry = pantryItemsText.some(pantryItem => 
+                    pantryItem.includes(ingredientLower) || ingredientLower.includes(pantryItem)
+                );
+                const inGroceryList = existingGroceryItems.some(groceryItem => 
+                    groceryItem.includes(ingredientLower) || ingredientLower.includes(groceryItem)
+                );
+
+                if (!inPantry && !inGroceryList) {
+                    groceryItems.push({ text: ingredientLower, completed: false, id: Date.now() + Math.random() });
+                    addedCount++;
+                } else {
+                    skippedCount++;
+                }
+            });
+
+            renderGroceryList();
+            saveToLocalStorage();
+
+            // Show feedback to user
+            let message = '';
+            if (addedCount > 0) {
+                message += `Added ${addedCount} ingredient${addedCount > 1 ? 's' : ''} to grocery list.`;
+            }
+            if (skippedCount > 0) {
+                if (message) message += ' ';
+                message += `Skipped ${skippedCount} ingredient${skippedCount > 1 ? 's' : ''} (already in pantry or grocery list).`;
+            }
+            if (message) {
+                alert(message);
+            }
+        }
+        function clearPantryCompleted() {
+            pantryItems = pantryItems.filter(item => !item.completed);
+            renderPantryList();
+            saveToLocalStorage();
+        }
+        function toggleGroceryItem(id) {
+            const item = groceryItems.find(item => item.id === id);
+            if (item) {
+                item.completed = !item.completed;
+                renderGroceryList();
+                saveToLocalStorage();
+            }
+        }
+
+        // Delete grocery item
+        function deleteGroceryItem(id) {
+            groceryItems = groceryItems.filter(item => item.id !== id);
+            renderGroceryList();
+            saveToLocalStorage();
+        }
+
+        // Clear completed items
+        function clearCompleted() {
+            groceryItems = groceryItems.filter(item => !item.completed);
+            renderGroceryList();
+            saveToLocalStorage();
+        }
+
+        // Save to memory (simulating localStorage functionality)
+        function saveToLocalStorage() {
+            // In a real environment, this would use localStorage
+            localStorage.setItem('mealPlan', JSON.stringify(mealData));
+            localStorage.setItem('groceryItems', JSON.stringify(groceryItems));
+            localStorage.setItem('pantryItems', JSON.stringify(pantryItems));
+        }
+
+        // Load from memory (simulating localStorage functionality)
+        function loadFromLocalStorage() {
+            // In a real environment, this would load from localStorage
+            const savedMealData = localStorage.getItem('mealPlan');
+            const savedGroceryItems = localStorage.getItem('groceryItems');
+            const savedPantryItems = localStorage.getItem('pantryItems');
+            if (savedMealData) mealData = JSON.parse(savedMealData);
+            if (savedGroceryItems) groceryItems = JSON.parse(savedGroceryItems);
+            if (savedPantryItems) pantryItems = JSON.parse(savedPantryItems);
+        }
+
+        // Save meal plan (export as JSON)
+        function saveMealPlan() {
+            const data = {
+                mealPlan: mealData,
+                groceryList: groceryItems,
+                pantryItems: pantryItems,
+                savedDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `meal-plan-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Load meal plan (import from JSON file)
+        function loadMealPlan() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.mealPlan) mealData = data.mealPlan;
+                            if (data.groceryList) groceryItems = data.groceryList;
+                            if (data.pantryItems) pantryItems = data.pantryItems;
+                            
+                            // Update UI
+                            updateMealPlanInputs();
+                            renderGroceryList();
+                            renderPantryList();
+                            saveToLocalStorage();
+                            
+                            alert('Meal plan loaded successfully!');
+                        } catch (error) {
+                            alert('Error loading meal plan. Please check the file format.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Update meal plan inputs with loaded data
+        function updateMealPlanInputs() {
+            days.forEach(day => {
+                const dinnerInput = document.getElementById(`${day}-dinner`);
+                const ingredientsInput = document.getElementById(`${day}-ingredients`);
+                
+                if (dinnerInput && mealData[day] && mealData[day].dinner) {
+                    dinnerInput.value = mealData[day].dinner;
+                }
+                if (ingredientsInput && mealData[day] && mealData[day].ingredients) {
+                    ingredientsInput.value = mealData[day].ingredients;
+                }
+            });
+        }
+
+        // Clear all data
+        function clearAll() {
+            if (confirm('Are you sure you want to clear all meal plans, grocery items, and pantry items?')) {
+                mealData = {};
+                groceryItems = [];
+                pantryItems = [];
+                days.forEach(day => {
+                    mealData[day] = { dinner: '', ingredients: '' };
+                });
+                updateMealPlanInputs();
+                renderGroceryList();
+                renderPantryList();
+                saveToLocalStorage();
+            }
+        }
+
+        // Handle Enter key for grocery and pantry inputs
+        document.getElementById('groceryInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addGroceryItem();
+            }
+        });
+        
+        document.getElementById('pantryInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPantryItem();
+            }
+        });
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMealPlan();
+            loadFromLocalStorage();
+            updateMealPlanInputs();
+            renderGroceryList();
+            renderPantryList();
+        });
+    </script>
+</body>
+</html>
